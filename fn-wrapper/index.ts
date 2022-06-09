@@ -1,22 +1,26 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
 
+const httpTriggerLoggerWrapper = function (
+    fn: AzureFunction
+  ): (...args: any[]) => Promise<void> {
+    return async function(context: Context, req: HttpRequest) {
+      try {
+        context.log('Logging before function called');
+        await fn(context, req);
+        context.log('Logging after function called');
+      } catch(error) {
+        throw error;
+      }
+    };
+  }
+
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
     context.log('HTTP trigger function processed a request.');
-    const name = (req.query.name || (req.body && req.body.name));
-    const responseMessage = name
-        ? "Hello, " + name + ". This HTTP triggered function executed successfully."
-        : "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.";
 
     context.res = {
-        // status: 200, /* Defaults to 200 */
-        body: responseMessage
+        body: 'OK'
     };
 
 };
 
-export default httpTrigger;
-
-const httpTriggerLoggerWrapper = async function (fn: AzureFunction) {
-}
-
-// decorators and middleware too
+export default httpTriggerLoggerWrapper(httpTrigger);
